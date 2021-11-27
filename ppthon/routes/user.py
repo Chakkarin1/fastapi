@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from config.database import conn
 from models.user import users
-from schemas.user import User
+from schemas.user import User, User_login
 user = APIRouter()
 
 @user.get("/users", tags=["users"])
@@ -23,6 +23,15 @@ def create_user(user: User):
         "phone": user.phone
     }))
     return conn.execute(users.select()).fetchall()
+
+@user.post("/users/login", tags=["users"])
+def user_login(user: User_login):
+    user = conn.execute(users.select().where(users.c.username == user.username ,users.c.password == user.password)).fetchall()
+    if len(user) > 0:
+        return {'result': user, 'status': True}
+    else:
+        return {'status': False}
+    # data.result[0].id
 
 @user.put("/users/{id}", tags=["users"])
 def update_user(id:int, user: User):
